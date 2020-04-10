@@ -120,14 +120,13 @@ if __name__ == "__main__":
         spark = SparkSession \
             .builder \
             .config("spark.ui.port", 3000) \
-            .config("spark.default.parallelism", 300) \
             .master("local[*]") \
             .appName("KafkaSparkStructuredStreaming") \
             .getOrCreate()
 
         logger.info("Spark started")
 
-        spark.sparkContext.setLogLevel("ERROR")
+        #spark.sparkContext.setLogLevel("ERROR")
 
         run_spark_job(spark)
     except:

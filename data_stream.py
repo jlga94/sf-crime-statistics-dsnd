@@ -40,9 +40,7 @@ def run_spark_job(spark):
             .option("kafka.bootstrap.servers", bootstrap_servers)
             .option("subscribe", topic_name)
             .option("startingOffsets", "earliest")
-            .option("maxRatePerPartition", 100)
             .option("maxOffsetsPerTrigger", 200)
-            .option("stopGracefullyOnShutdown", "true")
             .load()
          )
     # Show schema for the incoming resources for checks
@@ -68,7 +66,7 @@ def run_spark_job(spark):
 
     # count the number of original crime type
     agg_df = (distinct_table
-                  .withWatermark("call_date_time", "60 minutes")
+                  .withWatermark("call_date_time", "20 minutes")
                   .groupBy(
                       psf.window(psf.col("call_date_time"),"10 minutes","5 minutes"),
                       psf.col("original_crime_type_name"),
@@ -120,6 +118,8 @@ if __name__ == "__main__":
         spark = SparkSession \
             .builder \
             .config("spark.ui.port", 3000) \
+            .config("spark.streaming.kafka.maxRatePerPartition", 1000) \
+            .config("spark.default.parallelism", 300) \
             .master("local[*]") \
             .appName("KafkaSparkStructuredStreaming") \
             .getOrCreate()
